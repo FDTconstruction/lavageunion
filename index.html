@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Lavage Union — Entretien extérieur · Montréal & Rive-Sud</title>
 <meta name="description" content="Vitres, thermopompes, gouttières, ventilation, lavage à pression. Service clé en main pour Montréal, la Rive-Sud et la Montérégie. Soumission en 24 h.">
-
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = { theme: { extend: {
@@ -16,331 +15,585 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
 <style>
   html, body { height:100%; }
-  body { font-family:'Plus Jakarta Sans',sans-serif; color:#0E1B33; -webkit-font-smoothing:antialiased; overflow:hidden;
-         background: #EFF6FC; }
+  body { font-family:'Plus Jakarta Sans',sans-serif; color:#0E1B33; -webkit-font-smoothing:antialiased; overflow:hidden; background:#EFF6FC; }
   .font-display { font-family:'Outfit',sans-serif; letter-spacing:-0.02em; }
   .font-round { font-family:'Poppins',sans-serif; }
   .screen { position:fixed; inset:0; height:100dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 
-  .tile { transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, filter .35s; }
-  .tile:hover { transform: translateY(-5px); box-shadow: 0 20px 44px rgba(14,27,51,.18); filter:saturate(1.08); }
-  .tile:active { transform: translateY(-2px) scale(.99); }
-  .tile:hover .tile-arrow { transform: translate(3px,-3px); }
-  .tile-arrow { transition: transform .35s cubic-bezier(.22,1,.36,1); }
-  .tile-num { transition: transform .35s cubic-bezier(.22,1,.36,1); }
-  .tile:hover .tile-num { transform: scale(1.08) rotate(-4deg); }
+  .secbtn { border-radius:.9rem; transition: border-radius .45s cubic-bezier(.34,1.2,.5,1), transform .35s, box-shadow .35s; }
+  .secbtn::before { content:""; position:absolute; inset:0; z-index:0; width:0; background:linear-gradient(90deg, rgba(255,255,255,.32), rgba(255,255,255,.05)); transition:width .55s cubic-bezier(.4,0,.2,1); }
+  .secbtn:hover { border-radius:1.5rem; transform:translateY(-2px); box-shadow:0 16px 32px rgba(8,42,80,.4); }
+  .secbtn:hover::before { width:100%; }
+  .secbtn:hover .tile-arrow { transform:translate(3px,0); }
+  .tile-arrow { transition:transform .35s cubic-bezier(.22,1,.36,1); }
 
-  .panel { z-index:50; opacity:0; visibility:hidden; transform: translateY(28px) scale(.985);
-    transition: opacity .45s ease, transform .5s cubic-bezier(.22,1,.36,1), visibility .5s; pointer-events:none; }
+  .panel { z-index:50; opacity:0; visibility:hidden; transform:translateY(26px) scale(.985); transition:opacity .45s ease, transform .5s cubic-bezier(.22,1,.36,1), visibility .5s; pointer-events:none; }
   .panel.open { opacity:1; visibility:visible; transform:none; pointer-events:auto; }
-  .panel-in { opacity:0; transform: translateY(16px); transition: opacity .55s ease .12s, transform .55s cubic-bezier(.22,1,.36,1) .12s; }
+  .panel-in { opacity:0; transform:translateY(16px); transition:opacity .55s ease .35s, transform .55s cubic-bezier(.22,1,.36,1) .35s; }
   .panel.open .panel-in { opacity:1; transform:none; }
-  .btn-close { transition: background .25s, color .25s, transform .25s; }
-  .btn-close:hover { background:#fff; color:#0E1B33; transform: rotate(90deg); }
+  .btn-close { transition:background .25s, color .25s, transform .25s; }
+  .btn-close:hover { background:#fff; color:#0E1B33; transform:rotate(90deg); }
 
-  /* slider avant/après (technique : même photo, "avant" assombri + voile de saleté) */
-  .ba { position:relative; user-select:none; touch-action:none; cursor:ew-resize; }
-  .ba-scene { position:absolute; inset:0; }
-  .ba-after, .ba-before { position:absolute; inset:0; }
-  .ba-after img, .ba-before img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; pointer-events:none; -webkit-user-drag:none; }
-  .ba-before { will-change:clip-path; }
-  .ba-before img { filter: saturate(.5) brightness(.8) contrast(.93); }
-  .ba-grime { position:absolute; inset:0; mix-blend-mode:multiply; opacity:.55; pointer-events:none;
-    background: radial-gradient(circle at 22% 28%, rgba(92,76,46,.65), transparent 46%),
-                radial-gradient(circle at 72% 62%, rgba(74,82,52,.55), transparent 42%),
-                radial-gradient(circle at 46% 82%, rgba(84,74,50,.55), transparent 42%),
-                linear-gradient(rgba(112,102,72,.32), rgba(92,92,72,.32)); }
-  .ba-divider { position:absolute; top:0; bottom:0; width:3px; background:#fff; transform:translateX(-50%); box-shadow:0 0 14px rgba(14,27,51,.4); z-index:10; }
-  .ba-handle { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:52px; height:52px; border-radius:9999px; background:#fff; display:flex; align-items:center; justify-content:center; gap:2px; box-shadow:0 6px 22px rgba(14,27,51,.4); color:#12496E; cursor:grab; outline:none; z-index:11; }
-  .ba-handle:active { cursor:grabbing; }
-  .ba-tag { position:absolute; bottom:14px; z-index:12; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:5px 12px; border-radius:9999px; pointer-events:none; }
-  .ba-tab.is-on { background:#fff; color:#4C41D6; }
+  /* Zoom du camion à l'ouverture de CHAQUE section */
+  .van-reveal { position:absolute; inset:0; z-index:30; overflow:hidden; pointer-events:none; opacity:0; }
+  .van-reveal img { width:100%; height:100%; object-fit:cover; }
+  .panel.open .van-reveal { animation: vanZoom 1s cubic-bezier(.4,0,.2,1) forwards; }
+  @keyframes vanZoom { 0%{opacity:1;transform:scale(1);} 60%{opacity:1;} 100%{opacity:0;transform:scale(1.7);} }
 
-  .timeline-line { background-image: linear-gradient(to right, rgba(255,255,255,.5) 50%, transparent 50%); background-size: 14px 2px; background-repeat: repeat-x; }
+  .timeline-line { background-image:linear-gradient(to right, rgba(255,255,255,.5) 50%, transparent 50%); background-size:14px 2px; background-repeat:repeat-x; }
+
+
+  /* Palette inspirée directement des bleus du camion Lavage Union:
+     cyan #33AEEE · bleu logo #306AB9 · bleu moyen #5D8CC3 · bleu pâle #AAD7F7 */
+
+  /* ===== Ajustements plein écran / contraste ===== */
+  .hero-overlay {
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.95) 22%, rgba(255,255,255,.72) 36%, rgba(255,255,255,.22) 52%, rgba(255,255,255,0) 68%),
+      linear-gradient(180deg, rgba(226,244,255,.12), rgba(217,238,248,.28));
+  }
+  .hero-copy { max-width: 720px; position:relative; z-index:2; }
+  .hero-title { text-shadow:0 2px 18px rgba(255,255,255,.9), 0 1px 0 rgba(255,255,255,.95); }
+  .hero-lead { max-width: 560px; }
+  .hero-van-img {
+    transform-origin:79% 38%;
+    animation:heroLogoZoom 9.5s cubic-bezier(.3,.08,.2,1) infinite alternate;
+    will-change:transform, filter;
+    filter:saturate(1.04) contrast(1.03);
+  }
+  .hero-van-glow {
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 78% 34%, rgba(51,174,238,.32) 0%, rgba(51,174,238,.14) 12%, rgba(51,174,238,0) 30%),
+      radial-gradient(circle at 86% 28%, rgba(255,255,255,.34) 0%, rgba(255,255,255,.10) 11%, rgba(255,255,255,0) 24%),
+      linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.11) 46%, rgba(255,255,255,0) 74%);
+    mix-blend-mode:screen;
+    opacity:.88;
+    animation:heroLogoGlow 6.8s ease-in-out infinite alternate;
+  }
+  .hero-water-jet {
+    pointer-events:none;
+    z-index:1;
+    overflow:hidden;
+    opacity:.96;
+    mix-blend-mode:screen;
+  }
+  .hero-water-jet::before {
+    content:"";
+    position:absolute;
+    left:47%;
+    top:48%;
+    width:34%;
+    height:25%;
+    transform-origin:left center;
+    transform:rotate(-15deg);
+    background:
+      radial-gradient(circle at 7% 62%, rgba(255,255,255,.92) 0 1.5px, transparent 2.2px),
+      radial-gradient(circle at 13% 45%, rgba(207,243,255,.95) 0 2px, transparent 2.8px),
+      radial-gradient(circle at 19% 58%, rgba(162,226,255,.95) 0 2.3px, transparent 3.1px),
+      radial-gradient(circle at 26% 40%, rgba(255,255,255,.88) 0 1.8px, transparent 2.7px),
+      radial-gradient(circle at 32% 54%, rgba(122,210,249,.92) 0 2.4px, transparent 3.2px),
+      radial-gradient(circle at 39% 48%, rgba(210,245,255,.9) 0 1.7px, transparent 2.5px),
+      radial-gradient(circle at 45% 63%, rgba(103,194,242,.92) 0 2.6px, transparent 3.4px),
+      radial-gradient(circle at 52% 44%, rgba(255,255,255,.86) 0 1.9px, transparent 2.8px),
+      radial-gradient(circle at 59% 57%, rgba(181,235,255,.9) 0 2.2px, transparent 3px),
+      radial-gradient(circle at 66% 47%, rgba(102,193,241,.92) 0 2.9px, transparent 3.7px),
+      radial-gradient(circle at 73% 60%, rgba(230,249,255,.92) 0 1.8px, transparent 2.8px),
+      radial-gradient(circle at 81% 42%, rgba(144,222,255,.92) 0 2.2px, transparent 3.1px),
+      radial-gradient(circle at 88% 54%, rgba(255,255,255,.88) 0 1.7px, transparent 2.6px),
+      radial-gradient(circle at 95% 49%, rgba(122,210,249,.9) 0 2px, transparent 2.9px),
+      radial-gradient(ellipse at 50% 52%, rgba(173,231,255,.30) 0%, rgba(173,231,255,.16) 26%, rgba(173,231,255,0) 60%);
+    filter:blur(.2px) drop-shadow(0 0 10px rgba(108,206,255,.45));
+    animation:heroWaterDrops 2.4s ease-in-out infinite;
+  }
+  .hero-water-jet::after {
+    content:"";
+    position:absolute;
+    left:72.8%;
+    top:42%;
+    width:18%;
+    height:22%;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 20% 60%, rgba(255,255,255,.92) 0 2px, transparent 3px),
+      radial-gradient(circle at 34% 40%, rgba(196,240,255,.95) 0 2.5px, transparent 3.5px),
+      radial-gradient(circle at 48% 58%, rgba(103,194,242,.95) 0 3px, transparent 4px),
+      radial-gradient(circle at 62% 34%, rgba(255,255,255,.9) 0 2px, transparent 3px),
+      radial-gradient(circle at 70% 54%, rgba(162,226,255,.92) 0 2.6px, transparent 3.5px),
+      radial-gradient(circle at 82% 44%, rgba(255,255,255,.88) 0 1.8px, transparent 2.8px),
+      radial-gradient(circle at 50% 50%, rgba(164,228,255,.22) 0%, rgba(164,228,255,.10) 28%, rgba(164,228,255,0) 60%);
+    filter:blur(.25px) drop-shadow(0 0 16px rgba(130,214,255,.50));
+    animation:heroWaterBurst 2.4s ease-in-out infinite;
+  }
+  @keyframes heroLogoZoom {
+    0% { transform:scale(1.01); filter:saturate(1.03) contrast(1.02) brightness(1); }
+    100% { transform:scale(1.24); filter:saturate(1.08) contrast(1.05) brightness(1.02); }
+  }
+  @keyframes heroLogoGlow {
+    0% { transform:scale(1) translate3d(0,0,0); opacity:.74; }
+    100% { transform:scale(1.05) translate3d(.8%,-.4%,0); opacity:.96; }
+  }
+  @keyframes heroWaterDrops {
+    0%, 100% { opacity:.18; transform:rotate(-15deg) scale(.9) translate3d(-2%, 4%, 0); }
+    30% { opacity:.62; transform:rotate(-15deg) scale(1) translate3d(0, 0, 0); }
+    58% { opacity:.95; transform:rotate(-15deg) scale(1.05) translate3d(2%, -2%, 0); }
+  }
+  @keyframes heroWaterBurst {
+    0%, 100% { opacity:.2; transform:scale(.84) translate3d(-4%, 4%, 0); }
+    35% { opacity:.62; transform:scale(1.02) translate3d(0, 0, 0); }
+    60% { opacity:.9; transform:scale(1.12) translate3d(2%, -3%, 0); }
+  }
+  .hero-tiles { max-width: 440px; }
+  .hero-proof { max-width: 690px; }
+  .secbtn {
+    border:1px solid rgba(255,255,255,.26);
+    box-shadow:0 14px 30px rgba(6,45,80,.22), inset 0 1px 0 rgba(255,255,255,.20);
+  }
+  .secbtn svg { filter:drop-shadow(0 2px 2px rgba(3,28,55,.20)); }
+  .hero-tiles .tile-content > span:first-child {
+    width:3.25rem !important;
+    height:3.25rem !important;
+    background:#ffffff !important;
+    border:2px solid rgba(255,255,255,.96) !important;
+    box-shadow:0 10px 22px rgba(5,27,61,.25), inset 0 0 0 1px rgba(11,79,136,.06);
+    backdrop-filter:none;
+  }
+  .hero-tiles [data-open="services"] .tile-content > span:first-child svg,
+  .hero-tiles [data-open="voir"] .tile-content > span:first-child svg {
+    fill:#084C7F !important;
+    stroke:none !important;
+    filter:none;
+  }
+  .hero-tiles [data-open="approche"] .tile-content > span:first-child svg,
+  .hero-tiles [data-open="soumission"] .tile-content > span:first-child svg {
+    fill:none !important;
+    stroke:#084C7F !important;
+    stroke-width:2.15 !important;
+    filter:none;
+  }
+  .hero-tiles .tile-content > span:first-child svg { width:1.7rem !important; height:1.7rem !important; }
+
+  .hero-tiles .secbtn .font-display { color:#fff; text-shadow:0 2px 6px rgba(4,26,56,.28); }
+  .hero-tiles .tile-content { position:relative; z-index:1; display:flex; align-items:center; gap:.9rem; width:100%; }
+  .hero-tiles .tile-text { flex:1; min-width:0; }
+  .hero-tiles .tile-text .font-display { display:block; }
+  .hero-tiles .tile-arrow-wrap { position:relative; z-index:1; flex:none; margin-left:auto; }
+  .panel { overflow:hidden; }
+  .panel-shell { position:relative; z-index:40; width:100%; height:100dvh; min-height:0; }
+
+  /* Le camion passe réellement devant le contenu à chaque ouverture. */
+  .van-reveal {
+    z-index:70;
+    transform-origin:76% 56%;
+    background:#eaf6fc;
+    clip-path:inset(0 round 38px);
+    will-change:transform, opacity, clip-path, filter;
+  }
+  .van-reveal img {
+    object-position:72% center;
+    transform:scale(1.01);
+    filter:saturate(1.03) contrast(1.02);
+  }
+  .panel.open .van-reveal { animation:none; }
+  .panel.open .van-reveal.play { animation:vanZoomMorph 1.85s cubic-bezier(.22,.7,.16,1) forwards; }
+  @keyframes vanZoomMorph {
+    0% {
+      opacity:0;
+      transform:scale(.96);
+      clip-path:inset(3.5% 3.5% 3.5% 3.5% round 42px);
+      filter:blur(0px) saturate(1.02);
+    }
+    12% {
+      opacity:1;
+      transform:scale(1);
+      clip-path:inset(2.8% 2.8% 2.8% 2.8% round 36px);
+      filter:blur(0px) saturate(1.03);
+    }
+    58% {
+      opacity:1;
+      transform:scale(1.18);
+      clip-path:inset(1.5% 1.5% 1.5% 1.5% round 20px);
+      filter:blur(.15px) saturate(1.06);
+    }
+    100% {
+      opacity:0;
+      transform:scale(1.48);
+      clip-path:inset(0 round 0px);
+      filter:blur(1.1px) saturate(1.08);
+    }
+  }
+
+  .services-intro { max-width:820px; color:rgba(255,255,255,.88); line-height:1.55; }
+  .service-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.9rem; }
+  .service-card { background:rgba(255,255,255,.96); border:1px solid rgba(255,255,255,.5); border-radius:1.15rem; padding:1rem .95rem .95rem; color:#0E1B33; box-shadow:0 14px 34px rgba(4,35,70,.13); display:flex; flex-direction:column; align-items:center; text-align:center; min-height:186px; }
+  .service-card-icon { width:5.65rem; height:5.65rem; border-radius:1.15rem; display:flex; align-items:center; justify-content:center; flex:none; margin:0 auto .9rem; background:linear-gradient(145deg,#F5FCFF,#C8EBFC); color:#0B5D96; border:1px solid rgba(23,102,168,.16); box-shadow:0 10px 22px rgba(35,104,168,.12); }
+  .service-card-icon svg { width:4.35rem; height:4.35rem; stroke-width:1.55; }
+  .service-card-copy { min-width:0; width:100%; text-align:center; }
+  .service-card h3 { font-family:'Outfit',sans-serif; font-weight:650; font-size:1rem; line-height:1.15; margin-bottom:.38rem; color:#0B4F88; }
+  .service-card p { font-size:.78rem; line-height:1.42; color:#526B82; }
+  .services-cta { background:rgba(3,42,83,.18); border:1px solid rgba(255,255,255,.2); border-radius:1.15rem; padding:.75rem 1rem; }
+
+  .process-flow-wrap { position:relative; }
+  .process-track { position:absolute; left:8%; right:8%; top:3rem; height:2px; background-image:linear-gradient(to right, rgba(255,255,255,.55) 50%, transparent 50%); background-size:14px 2px; background-repeat:repeat-x; }
+  .process-flow { position:relative; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1.2rem; }
+  .process-step { position:relative; text-align:center; }
+  .process-icon { width:106px; height:106px; border-radius:9999px; background:rgba(255,255,255,.95); display:flex; align-items:center; justify-content:center; margin:0 auto 1.15rem; color:#2264B3; box-shadow:0 18px 40px rgba(4,25,58,.14); position:relative; }
+  .process-step.is-dark .process-icon { background:#071C4B; color:#fff; }
+  .process-step svg { width:34px; height:34px; }
+  .process-num { position:absolute; top:-.35rem; right:-.15rem; width:3rem; height:3rem; border-radius:9999px; background:#071C4B; color:#fff; font-family:'Outfit',sans-serif; font-weight:700; font-size:1.35rem; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 22px rgba(4,22,52,.24); }
+  .process-step.is-dark .process-num { background:#fff; color:#071C4B; }
+  .process-copy h3 { font-family:'Outfit',sans-serif; font-size:1.05rem; font-weight:600; line-height:1.15; margin-bottom:.55rem; }
+  .process-copy p { font-size:.95rem; line-height:1.55; color:rgba(255,255,255,.86); max-width:17rem; margin:0 auto; }
+  .approach-bottom-card { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:1.6rem; }
+  .approach-bottom-copy { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:1.6rem; }
+  .approach-mini-pills { display:flex; flex-wrap:wrap; gap:.65rem; }
+  .approach-mini-pills span { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:9999px; padding:.55rem .85rem; font-size:.82rem; color:rgba(255,255,255,.96); }
+
+  @media (min-width: 1024px) {
+    .screen { overflow:hidden; }
+    .hero-title { font-size:clamp(2rem, 2.55vw, 2.65rem); }
+    .hero-proof { flex-wrap:nowrap; gap:1.7rem; }
+    .hero-proof > div { flex:none; }
+    .panel-shell { padding-top:clamp(1.4rem,3vh,2rem); padding-bottom:clamp(1.4rem,3vh,2rem); }
+    .panel-shell > .flex.items-start.justify-between { margin-bottom:clamp(.9rem,2vh,1.35rem); }
+    #panel-services .services-intro { margin-bottom:.9rem; font-size:.91rem; }
+    #panel-services .service-grid { margin-bottom:.95rem; }
+    #panel-services .service-card { min-height:182px; padding:.9rem .9rem .88rem; }
+    #panel-services .service-card p { font-size:.74rem; }
+    #panel-voir .panel-in.mt-8 { margin-top:1.15rem; }
+    #panel-approche .process-flow-wrap { margin-bottom:1rem; }
+    #panel-approche .process-copy p { font-size:.9rem; line-height:1.45; }
+    #panel-approche .approach-report { max-width:250px; }
+    #panel-soumission .panel-shell > .flex.items-start.justify-between { margin-bottom:1.35rem; }
+  }
+
+  @media (min-width:1024px) and (max-height:760px) {
+    header { padding-top:.65rem !important; padding-bottom:.65rem !important; }
+    header img { height:3rem !important; }
+    .hero-copy { padding-top:.6rem !important; padding-bottom:.6rem !important; }
+    .hero-title { margin-bottom:.55rem !important; font-size:clamp(1.8rem,2.35vw,2.3rem); }
+    .hero-lead { margin-bottom:.8rem !important; font-size:.93rem; line-height:1.45; }
+    .hero-tiles { margin-bottom:.85rem !important; gap:.55rem; }
+    .hero-tiles .secbtn { padding:.65rem .8rem !important; min-height:0 !important; }
+    .hero-tiles .tile-content > span:first-child { width:2.85rem !important; height:2.85rem !important; }
+    .hero-proof svg { width:20px; height:20px; }
+    .hero-proof span { font-size:.78rem !important; }
+    .panel-shell { padding-top:1rem; padding-bottom:1rem; }
+    .panel-shell h2 { font-size:2rem !important; }
+    #panel-services .service-card { min-height:170px; padding:.82rem .82rem .8rem; }
+    #panel-services .service-card-icon { width:5rem; height:5rem; margin:0 auto .72rem; }
+    #panel-services .service-card-icon svg { width:3.65rem; height:3.65rem; }
+    #panel-services .service-card h3 { font-size:.95rem; margin-bottom:.28rem; }
+    #panel-services .service-card p { font-size:.71rem; line-height:1.35; }
+    #panel-services .services-intro { font-size:.78rem; line-height:1.4; margin-bottom:.65rem; }
+    #panel-services .service-grid { gap:.55rem; margin-bottom:.65rem; }
+    #panel-voir .panel-in.grid.md\:grid-cols-3 { gap:.7rem; }
+    #panel-approche .process-icon { width:92px; height:92px; margin-bottom:.9rem; }
+    #panel-approche .process-num { width:2.5rem; height:2.5rem; font-size:1.1rem; }
+    #panel-approche .process-track { top:2.6rem; }
+    #panel-approche .process-copy h3 { font-size:1rem; margin-bottom:.38rem; }
+    #panel-approche .process-copy p { font-size:.82rem; line-height:1.4; }
+    #panel-approche .approach-report { max-width:220px; }
+  }
+
+  @media (max-width: 1023px) {
+    body { overflow:hidden; }
+    .screen { overflow-y:auto; overflow-x:hidden; }
+    .panel { overflow-y:auto; }
+    .panel-shell { height:auto; min-height:100dvh; justify-content:flex-start; padding-top:1.35rem; padding-bottom:1.5rem; }
+    .hero-copy { max-width:680px; }
+    .hero-title { white-space:normal; }
+    .hero-overlay {
+      background:linear-gradient(90deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.93) 52%, rgba(255,255,255,.62) 76%, rgba(255,255,255,.28) 100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-van-img, .hero-van-glow, .hero-water-jet::before, .hero-water-jet::after, .panel.open .van-reveal.play { animation:none !important; }
+  }
+
+  @media (max-width: 640px) {
+    header { padding:.7rem 1rem !important; }
+    header img { height:2.65rem !important; }
+    header a { font-size:.82rem; }
+    main > section { min-height:calc(100dvh - 64px); }
+    .hero-overlay {
+      background:linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.91) 58%, rgba(255,255,255,.72) 100%);
+    }
+    .hero-van-img { transform-origin:77% 34%; }
+    .hero-water-jet::before { left:41%; top:56%; width:46%; height:26%; }
+    .hero-water-jet::after { left:68%; top:42%; width:24%; height:20%; }
+    .hero-copy { padding-top:1rem; padding-bottom:4.4rem; }
+    .hero-title { font-size:clamp(1.55rem,7vw,2rem); margin-bottom:.7rem; }
+    .hero-lead { font-size:.91rem; margin-bottom:.9rem; max-width:95%; }
+    .hero-tiles { gap:.6rem; margin-bottom:.85rem; }
+    .hero-tiles .secbtn { padding:.72rem !important; }
+    .hero-tiles .secbtn:not(.col-span-2) { min-height:92px; }
+    .hero-tiles .tile-content { gap:.65rem; }
+    .hero-tiles .tile-text .font-display { font-size:.9rem; line-height:1.15; }
+    .hero-tiles .tile-content > span:first-child { width:2.8rem !important; height:2.8rem !important; border-radius:.85rem; }
+    .hero-tiles .secbtn > span:first-child svg { width:1.45rem !important; height:1.45rem !important; }
+    .hero-tiles .font-display { font-size:.92rem; }
+    .hero-tiles .tile-content { gap:.75rem; }
+    .hero-proof { gap:.42rem .8rem; }
+    .hero-proof svg { width:20px; height:20px; }
+    .hero-proof span { font-size:.76rem !important; }
+    .panel-shell { padding-left:1rem !important; padding-right:1rem !important; }
+    .panel-shell h2 { font-size:1.75rem !important; line-height:1.02 !important; }
+    #panel-services .service-grid { grid-template-columns:1fr; gap:.7rem; }
+    #panel-services .service-card { min-height:0; padding:.85rem; align-items:center; text-align:center; }
+    #panel-services .service-card-icon { width:4.75rem; height:4.75rem; margin:0 auto .68rem; }
+    #panel-services .service-card-icon svg { width:3.45rem; height:3.45rem; }
+    #panel-services .services-intro { font-size:.9rem; margin-bottom:1rem; }
+    #panel-voir .panel-in.grid { grid-template-columns:1fr; }
+    .process-track { display:none; }
+    .process-flow { grid-template-columns:1fr; gap:1rem; }
+    .process-step { text-align:left; display:grid; grid-template-columns:auto 1fr; gap:.9rem; align-items:center; }
+    .process-icon { width:76px; height:76px; margin:0; }
+    .process-num { width:2.2rem; height:2.2rem; font-size:1rem; top:-.2rem; right:-.2rem; }
+    .process-copy h3 { margin-bottom:.3rem; font-size:1rem; }
+    .process-copy p { margin:0; max-width:none; font-size:.88rem; line-height:1.45; }
+    #panel-approche .approach-report { max-width:240px; }
+    #panel-soumission .panel-in.grid { grid-template-columns:1fr; gap:1.2rem; }
+    .van-reveal img { object-position:68% center; }
+  }
 </style>
 </head>
 <body>
 
 <!-- ══════════ LAUNCHER ══════════ -->
 <main class="screen z-10 flex flex-col">
-  <header class="flex items-center justify-between px-6 lg:px-12 py-5 lg:py-6 shrink-0">
-    <span class="bg-white rounded-2xl px-4 py-2.5 shadow-md ring-1 ring-black/5"><img src="https://decelectrique.com/LogoUnion.png" alt="Lavage Union" class="h-14 sm:h-16 lg:h-[4.5rem] w-auto"></span>
-    <div class="flex items-center gap-3 sm:gap-5">
-      <button data-open="contact" class="hidden md:inline text-sm font-semibold text-navy hover:text-ink">Nous joindre</button>
-      <a href="tel:14385212103" class="hidden sm:inline text-base font-semibold text-navy hover:text-ink">438 521-2103</a>
-      <a href="https://plannit.io/merchants/lavageunion?language=fr&view=merchantProfile" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-[#085292] hover:bg-[#0a4a80] text-white px-6 py-3 rounded-full text-sm font-semibold transition-colors">Soumission gratuite <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
-    </div>
+  <header class="flex items-center justify-between px-6 lg:px-12 py-4 lg:py-5 shrink-0">
+    <span class="bg-white rounded-2xl px-4 py-2 shadow-md ring-1 ring-black/5"><img src="https://decelectrique.com/LogoUnion.png" alt="Lavage Union" class="h-12 sm:h-14 lg:h-16 w-auto"></span>
+    <a href="tel:14385212103" class="text-base font-semibold text-navy hover:text-ink">438 521-2103</a>
   </header>
 
-  <!-- HERO photo camion -->
-  <section class="relative flex-1 min-h-[430px] overflow-hidden bg-gradient-to-br from-[#EAF6FC] to-[#CFE6F5]">
-    <img src="hero-van.jpg" alt="Camion Lavage Union en action" class="absolute inset-0 w-full h-full object-cover object-right">
-    <div class="absolute inset-0 bg-gradient-to-r from-white via-white/72 to-transparent"></div>
+  <section class="relative flex-1 min-h-[420px] overflow-hidden bg-gradient-to-br from-[#EAF6FC] to-[#CFE6F5]">
+    <img src="hero-van.jpg" alt="Camion Lavage Union en action" class="hero-van-img absolute inset-0 w-full h-full object-cover object-right">
+    <div class="hero-van-glow absolute inset-0"></div>
+    <div class="hero-water-jet absolute inset-0"></div>
+    <div class="hero-overlay absolute inset-0"></div>
     <div class="relative h-full max-w-7xl mx-auto px-6 lg:px-12 flex items-center">
-      <div class="font-round max-w-xl pt-6 pb-24 md:pb-28">
-        <h1 class="font-extrabold text-[1.9rem] md:text-4xl lg:text-[2.6rem] leading-[1.08] mb-5">
-          <span class="text-[#085292]">Un lavage professionnel,</span><br>
-          <span class="text-[#0095C8]">rapide et impeccable</span>
+      <div class="hero-copy font-round w-full py-6">
+        <h1 class="hero-title font-extrabold leading-tight text-[1.6rem] sm:text-3xl lg:text-[2rem] xl:text-[2.35rem] mb-4" style="text-shadow:0 2px 18px rgba(255,255,255,.65);">
+          <span class="block text-[#085292]">Un lavage professionnel,</span><span class="block text-[#0095C8]">rapide et impeccable</span>
         </h1>
-        <p class="text-base lg:text-lg leading-relaxed max-w-md mb-7 text-[#4F6E8F]">Lavage Union offre des services de nettoyage professionnels pour des résultats éclatants, durables et sans souci.</p>
-        <a href="https://plannit.io/merchants/lavageunion?language=fr&view=merchantProfile" target="_blank" rel="noopener" class="group inline-flex items-center gap-3 bg-[#0095C8] hover:bg-[#0284ab] text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg shadow-[#0095C8]/30 transition-all hover:-translate-y-0.5 mb-8">
-          Demander une soumission
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform group-hover:translate-x-1"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-        <div class="flex flex-wrap gap-x-7 gap-y-4">
-          <div class="flex items-center gap-3">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="luDrop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38C3E8"/><stop offset="1" stop-color="#0876B8"/></linearGradient></defs><path d="M12 2S5 9.5 5 14.5a7 7 0 0 0 14 0C19 9.5 12 2 12 2Z" fill="url(#luDrop)"/><path d="M9 14.5a3 3 0 0 0 2 2.6" stroke="#fff" stroke-width="1.3" stroke-linecap="round" opacity=".7"/></svg>
-            <span class="font-semibold leading-tight text-[#085292]">Résultats<br>impeccables</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2 20 5v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5Z" fill="#0A3F6E"/><path d="M8.4 12 11 14.6 15.6 9.6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span class="font-semibold leading-tight text-[#085292]">Service fiable<br>et professionnel</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20C4 11 11 4 21 4c0 10-7 17-17 16Z" fill="#0095C8"/><path d="M8 17C11 12.5 15 9 19 7" stroke="#fff" stroke-width="1.3" stroke-linecap="round" opacity=".55"/></svg>
-            <span class="font-semibold leading-tight text-[#085292]">Solutions<br>écoresponsables</span>
-          </div>
+        <p class="hero-lead text-base lg:text-lg leading-relaxed mb-5 text-[#315676]">Lavage Union offre des services de nettoyage professionnels pour des résultats éclatants, durables et sans souci.</p>
+
+        <div class="hero-tiles grid grid-cols-2 gap-3 mb-5">
+          <button data-open="services" class="secbtn group col-span-2 w-full text-left relative overflow-hidden p-4 text-white shadow-lg ring-1 ring-white/15" style="background: radial-gradient(circle at 18% 18%, #1C78B8 0%, #3496D5 28%, #66BDEB 58%, #A7DBF8 82%, #EAF8FF 100%)">
+            <div class="tile-content">
+              <span class="w-11 h-11 rounded-xl bg-white/20 ring-1 ring-white/35 shadow-inner flex items-center justify-center shrink-0"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l1.9 4.7L18.6 8.5l-4.7 1.8L12 15l-1.9-4.7L5.4 8.5l4.7-1.8z"/><path d="M18.6 13.5l1 2.5 2.4 1-2.4 1-1 2.5-1-2.5-2.5-1 2.5-1z"/></svg></span>
+              <span class="tile-text"><span class="font-display text-lg font-semibold">Services</span></span>
+              <span class="tile-arrow-wrap"><span class="tile-arrow inline-flex items-center justify-center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></span>
+            </div>
+          </button>
+          <button data-open="approche" class="secbtn group relative overflow-hidden p-4 min-h-[104px] text-white text-left shadow-lg ring-1 ring-white/15" style="background: radial-gradient(circle at 26% 18%, #2E88C4 0%, #57B5E8 34%, #8FD6F6 68%, #C9ECFD 100%)">
+            <div class="tile-content h-full">
+              <span class="w-10 h-10 rounded-xl bg-white/20 ring-1 ring-white/35 shadow-inner flex items-center justify-center shrink-0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.3"/><circle cx="18" cy="18" r="2.3"/><path d="M8.3 6H14a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h5.6"/></svg></span>
+              <span class="tile-text"><span class="font-display text-base font-semibold leading-tight">Notre approche</span></span>
+              <span class="tile-arrow-wrap"><span class="tile-arrow inline-flex items-center justify-center opacity-90"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></span>
+            </div>
+          </button>
+          <button data-open="voir" class="secbtn group relative overflow-hidden p-4 min-h-[104px] text-white text-left shadow-lg ring-1 ring-white/15" style="background: radial-gradient(circle at 72% 18%, #78C6F0 0%, #4B9DDA 28%, #2E71BC 62%, #1B5296 100%)">
+            <div class="tile-content h-full">
+              <span class="w-10 h-10 rounded-xl bg-white/20 ring-1 ring-white/35 shadow-inner flex items-center justify-center shrink-0"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span>
+              <span class="tile-text"><span class="font-display text-base font-semibold leading-tight">Nous voir en action</span></span>
+              <span class="tile-arrow-wrap"><span class="tile-arrow inline-flex items-center justify-center opacity-90"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></span>
+            </div>
+          </button>
+          <button data-open="soumission" class="secbtn group col-span-2 w-full text-left relative overflow-hidden p-4 text-white shadow-lg ring-1 ring-white/15" style="background: radial-gradient(circle at 20% 18%, #5EADE4 0%, #2F77C0 32%, #184E97 64%, #082D66 100%)">
+            <div class="tile-content">
+              <span class="w-11 h-11 rounded-xl bg-white/20 ring-1 ring-white/35 shadow-inner flex items-center justify-center shrink-0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 14.5l2 2 4-4.5"/></svg></span>
+              <span class="tile-text"><span class="font-display text-lg font-semibold">Demander une soumission</span></span>
+              <span class="tile-arrow-wrap"><span class="tile-arrow inline-flex items-center justify-center w-9 h-9 rounded-full bg-white text-[#0A5EA0]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span></span>
+            </div>
+          </button>
+        </div>
+
+        <div class="hero-proof flex flex-wrap lg:flex-nowrap items-center gap-x-5 gap-y-2">
+          <div class="flex items-center gap-2 whitespace-nowrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="luDrop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38C3E8"/><stop offset="1" stop-color="#0876B8"/></linearGradient></defs><path d="M12 2S5 9.5 5 14.5a7 7 0 0 0 14 0C19 9.5 12 2 12 2Z" fill="url(#luDrop)"/></svg><span class="text-sm font-semibold text-[#085292]">Résultats impeccables</span></div>
+          <div class="flex items-center gap-2 whitespace-nowrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2 20 5v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5Z" fill="#0A3F6E"/><path d="M8.4 12 11 14.6 15.6 9.6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="text-sm font-semibold text-[#085292]">Service fiable</span></div>
+          <div class="flex items-center gap-2 whitespace-nowrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20C4 11 11 4 21 4c0 10-7 17-17 16Z" fill="#0095C8"/></svg><span class="text-sm font-semibold text-[#085292]">Écoresponsable</span></div>
         </div>
       </div>
     </div>
-    <div class="absolute bottom-0 left-0 right-0 leading-none pointer-events-none"><svg viewBox="0 0 1440 260" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" aria-hidden="true" class="block w-full h-[70px] md:h-[120px]"><defs><linearGradient id="waveFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EAF6FC"/><stop offset="100%" stop-color="#D9EDF8"/></linearGradient></defs><path d="M0,125 C120,185 280,190 470,155 C650,120 790,130 930,195 C1070,255 1230,270 1440,245 L1440,260 L0,260 Z" fill="url(#waveFill)"/></svg></div>
-  </section>
-
-  <!-- Boîtes de sections -->
-  <section class="bg-[#D9EDF8] px-6 lg:px-12 pt-1 pb-7">
-    <div class="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <button data-open="services" class="tile group text-left overflow-hidden rounded-3xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 min-h-[100px] text-white bg-gradient-to-br from-[#38C6E6] via-[#1FA4DA] to-[#1573C9]">
-          <span class="tile-num w-12 h-12 rounded-xl bg-white text-[#1573C9] font-display font-bold text-2xl flex items-center justify-center shadow shrink-0">1</span>
-          <div class="flex-1 min-w-0"><div class="text-[10px] font-bold uppercase tracking-widest text-white/75 mb-0.5">Section</div><div class="font-display text-base sm:text-lg leading-tight">Services & zones</div></div>
-          <span class="tile-arrow w-8 h-8 rounded-full border border-white/40 flex items-center justify-center shrink-0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg></span>
-        </button>
-        <button data-open="action" class="tile group text-left overflow-hidden rounded-3xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 min-h-[100px] text-white"><video class="absolute inset-0 w-full h-full object-cover" poster="https://static.wixstatic.com/media/b0fb25_82d0060517b34966831181990da04bbbf003.jpg" autoplay muted loop playsinline preload="auto"><source src="hero-lavage.mp4" type="video/mp4"></video><div class="absolute inset-0 bg-gradient-to-br from-[#173A8A]/90 via-[#2563EB]/70 to-[#3B82F6]/45"></div>
-          <span class="relative tile-num w-12 h-12 rounded-xl bg-white text-[#1E3A8A] font-display font-bold text-2xl flex items-center justify-center shadow shrink-0">2</span>
-          <div class="relative flex-1 min-w-0"><div class="text-[10px] font-bold uppercase tracking-widest text-white/75 mb-0.5">Section</div><div class="font-display text-base sm:text-lg leading-tight">Réalisations</div></div>
-          <span class="relative tile-arrow w-8 h-8 rounded-full border border-white/40 flex items-center justify-center shrink-0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg></span>
-        </button>
-        <button data-open="approche" class="tile group text-left overflow-hidden rounded-3xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 min-h-[100px] text-white bg-gradient-to-br from-[#4AA8F0] via-[#2E86D8] to-[#1B5FB0]">
-          <span class="tile-num w-12 h-12 rounded-xl bg-white text-[#1B5FB0] font-display font-bold text-2xl flex items-center justify-center shadow shrink-0">3</span>
-          <div class="flex-1 min-w-0"><div class="text-[10px] font-bold uppercase tracking-widest text-white/75 mb-0.5">Section</div><div class="font-display text-base sm:text-lg leading-tight">Notre approche</div></div>
-          <span class="tile-arrow w-8 h-8 rounded-full border border-white/40 flex items-center justify-center shrink-0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg></span>
-        </button>
-        <button data-open="resultats" class="tile group text-left overflow-hidden rounded-3xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 min-h-[100px] text-white bg-gradient-to-br from-[#6C7BF2] via-[#5563E6] to-[#3D3FC4]">
-          <span class="tile-num w-12 h-12 rounded-xl bg-white text-[#4C41D6] font-display font-bold text-2xl flex items-center justify-center shadow shrink-0">4</span>
-          <div class="flex-1 min-w-0"><div class="text-[10px] font-bold uppercase tracking-widest text-white/75 mb-0.5">Section</div><div class="font-display text-base sm:text-lg leading-tight">Résultats & avis</div></div>
-          <span class="tile-arrow w-8 h-8 rounded-full border border-white/40 flex items-center justify-center shrink-0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg></span>
-        </button>
-    </div>
+    <div class="absolute bottom-0 left-0 right-0 leading-none pointer-events-none"><svg viewBox="0 0 1440 260" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" aria-hidden="true" class="block w-full h-[60px] md:h-[100px]"><defs><linearGradient id="waveFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EAF6FC"/><stop offset="100%" stop-color="#D9EDF8"/></linearGradient></defs><path d="M0,125 C120,185 280,190 470,155 C650,120 790,130 930,195 C1070,255 1230,270 1440,245 L1440,260 L0,260 Z" fill="url(#waveFill)"/></svg></div>
   </section>
 </main>
 
-<!-- ══════════ PANNEAU 1 · SERVICES + ZONES (bento) ══════════ -->
-<section id="panel-services" class="panel screen text-white bg-gradient-to-br from-[#38C6E6] via-[#1FA4DA] to-[#1573C9]">
-  <div class="max-w-6xl mx-auto px-6 lg:px-10 py-14 lg:py-20">
-    <div class="flex items-start justify-between mb-10">
-      <div class="panel-in flex items-start gap-4">
-        <span class="w-14 h-14 rounded-2xl bg-white text-[#1573C9] font-display font-bold text-3xl flex items-center justify-center shadow-lg shrink-0">1</span>
-        <div><div class="text-xs font-bold uppercase tracking-[0.2em] text-white/80 mb-2">Nos services</div><h2 class="font-display text-4xl md:text-5xl font-light leading-[0.98]">Tout l'entretien,<br>un seul appel.</h2></div>
-      </div>
+<!-- ══════════ SERVICES ══════════ -->
+<section id="panel-services" class="panel screen text-white" style="background: radial-gradient(circle at 10% 8%, rgba(122,217,250,.95) 0%, rgba(51,174,238,.60) 20%, rgba(51,174,238,0) 43%), radial-gradient(circle at 88% 86%, rgba(48,106,185,.48) 0%, rgba(48,106,185,0) 38%), linear-gradient(135deg, #37B7ED 0%, #1689C4 42%, #0B5D96 68%, #052E58 100%)">
+  <div class="van-reveal"><img src="hero-van.jpg" alt=""></div>
+  <div class="panel-shell max-w-6xl mx-auto px-6 lg:px-10 py-8 min-h-full flex flex-col justify-center">
+    <div class="flex items-start justify-between mb-4">
+      <div class="panel-in"><div class="text-xs font-bold uppercase tracking-[0.2em] text-white/80 mb-2">Nos services</div><h2 class="font-display text-3xl md:text-4xl font-light leading-[0.98]">Tout l'entretien, un seul appel.</h2></div>
       <button data-close class="btn-close shrink-0 w-11 h-11 rounded-full border border-white/40 flex items-center justify-center text-white" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
 
-    <!-- BENTO -->
-    <div class="panel-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[minmax(120px,auto)]">
+    <p class="panel-in services-intro mb-4">Du nettoyage des surfaces visibles à l'entretien des équipements et conduits, Lavage Union regroupe vos besoins extérieurs sous un même service. L'objectif : une propriété plus propre, des installations mieux entretenues et moins de coordination pour vous.</p>
 
-      <!-- gros bloc : 6 services -->
-      <div class="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-white text-ink rounded-3xl p-7 lg:p-8">
-        <div class="flex items-center justify-between mb-5"><h3 class="font-display text-2xl text-ink">Nos 6 expertises</h3><span class="text-xs font-bold uppercase tracking-widest text-mute">Forfaits avantageux</span></div>
-        <div class="grid sm:grid-cols-2 gap-x-8 gap-y-3">
-          <div class="flex items-start gap-3 py-1"><span class="w-9 h-9 rounded-xl bg-[#E7F5FB] flex items-center justify-center shrink-0"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6"><rect x="9" y="9" width="26" height="28" rx="2.5" stroke="#12496E" stroke-width="2.4"/><line x1="22" y1="10" x2="22" y2="36" stroke="#12496E" stroke-width="2.4"/><line x1="10" y1="23" x2="34" y2="23" stroke="#12496E" stroke-width="2.4"/><path d="M13 19 L18 13" stroke="#0FB5C6" stroke-width="2" stroke-linecap="round"/><path d="M13 32 L19 26" stroke="#0FB5C6" stroke-width="2" stroke-linecap="round"/><path d="M33 7 l1.1 2.6 2.6 1.1 -2.6 1.1 -1.1 2.6 -1.1 -2.6 -2.6 -1.1 2.6 -1.1 z" fill="#0FB5C6"/></svg></span><div><div class="font-semibold text-ink">Nettoyage de vitres</div><div class="text-xs text-mute">Intérieur, extérieur, en hauteur.</div></div></div>
-          <div class="flex items-start gap-3 py-1"><span class="w-9 h-9 rounded-xl bg-[#E7F5FB] flex items-center justify-center shrink-0"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6"><rect x="6" y="12" width="32" height="20" rx="3" stroke="#12496E" stroke-width="2.4"/><g stroke="#12496E" stroke-width="1.6" stroke-linecap="round"><line x1="10" y1="20" x2="17" y2="20"/><line x1="10" y1="24" x2="17" y2="24"/><line x1="10" y1="28" x2="17" y2="28"/></g><circle cx="28" cy="22" r="7.5" stroke="#12496E" stroke-width="2.2"/><g stroke="#0FB5C6" stroke-width="1.6" stroke-linecap="round"><line x1="28" y1="22" x2="28" y2="15"/><line x1="28" y1="22" x2="35" y2="22"/><line x1="28" y1="22" x2="23" y2="27"/><line x1="28" y1="22" x2="33" y2="27"/></g><circle cx="28" cy="22" r="2.1" fill="#0FB5C6"/><line x1="12" y1="32" x2="12" y2="35.5" stroke="#12496E" stroke-width="2.4" stroke-linecap="round"/><line x1="32" y1="32" x2="32" y2="35.5" stroke="#12496E" stroke-width="2.4" stroke-linecap="round"/></svg></span><div><div class="font-semibold text-ink">Thermopompes</div><div class="text-xs text-mute">Nettoyage et dégraissage.</div></div></div>
-          <div class="flex items-start gap-3 py-1"><span class="w-9 h-9 rounded-xl bg-[#E7F5FB] flex items-center justify-center shrink-0"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6"><rect x="7" y="10" width="22" height="24" rx="3" stroke="#12496E" stroke-width="2.4"/><g stroke="#12496E" stroke-width="1.8" stroke-linecap="round"><line x1="11" y1="15" x2="25" y2="15"/><line x1="11" y1="19" x2="25" y2="19"/><line x1="11" y1="23" x2="25" y2="23"/><line x1="11" y1="27" x2="25" y2="27"/><line x1="11" y1="31" x2="25" y2="31"/></g><path d="M32 15 q6 3.5 0 7" stroke="#0FB5C6" stroke-width="2" stroke-linecap="round"/><path d="M32 24 q7 4 0 8" stroke="#0FB5C6" stroke-width="2" stroke-linecap="round"/></svg></span><div><div class="font-semibold text-ink">Ventilation</div><div class="text-xs text-mute">Conduits et systèmes.</div></div></div>
-          <div class="flex items-start gap-3 py-1"><span class="w-9 h-9 rounded-xl bg-[#E7F5FB] flex items-center justify-center shrink-0"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" stroke="#12496E" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M8 17 h18 v6 h-18 z"/><path d="M26 18 h4 l4 2 -4 2 h-4 z"/><path d="M13 23 l-3 10 h5 l3 -8"/><path d="M17 23 v4"/><g stroke="#0FB5C6"><path d="M35 20 h5"/><path d="M35 16.5 l5 -2"/><path d="M35 23.5 l5 2"/></g></svg></span><div><div class="font-semibold text-ink">Lavage à pression</div><div class="text-xs text-mute">Revêtements, pavés, terrasses.</div></div></div>
-          <div class="flex items-start gap-3 py-1"><span class="w-9 h-9 rounded-xl bg-[#E7F5FB] flex items-center justify-center shrink-0"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6"><rect x="6" y="13" width="10" height="16" rx="2" stroke="#12496E" stroke-width="2.2"/><g stroke="#12496E" stroke-width="1.6" stroke-linecap="round"><line x1="9" y1="18" x2="13" y2="18"/><line x1="9" y1="21" x2="13" y2="21"/><line x1="9" y1="24" x2="13" y2="24"/></g><path d="M16 16 l4 2 4 -2 4 2 4 -2" stroke="#12496E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M16 26 l4 -2 4 2 4 -2 4 2" stroke="#12496E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><line x1="16" y1="16" x2="16" y2="26" stroke="#12496E" stroke-width="2"/><path d="M33 17 q4 4 0 8" stroke="#0FB5C6" stroke-width="2" stroke-linecap="round"/></svg></span><div><div class="font-semibold text-ink">Conduits de sécheuse</div><div class="text-xs text-mute">Prévention des incendies.</div></div></div>
-          <div class="flex items-start gap-3 py-1"><span class="w-9 h-9 rounded-xl bg-[#E7F5FB] flex items-center justify-center shrink-0"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" stroke="#12496E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13 h22"/><path d="M8 16 v3 a2.5 2.5 0 0 0 2.5 2.5 h14 a2.5 2.5 0 0 0 2.5 -2.5 v-3"/><path d="M27 21.5 v8 a2.5 2.5 0 0 1 -2.5 2.5 h-2"/><path d="M15 28 q0 2.4 1.6 2.4 q1.6 0 1.6 -2.4 q0 -1.2 -1.6 -3.4 q-1.6 2.2 -1.6 3.4 z" fill="#0FB5C6" stroke="none"/></svg></span><div><div class="font-semibold text-ink">Gouttières</div><div class="text-xs text-mute">Nettoyage et inspection.</div></div></div>
-        </div>
-      </div>
-
-      <!-- stat 24h -->
-      <div class="bg-white/15 border border-white/25 rounded-3xl p-6 flex flex-col justify-center">
-        <div class="font-display text-5xl font-light leading-none mb-1">24<span class="text-white/70">h</span></div>
-        <div class="text-sm text-white/85 font-semibold">Soumission détaillée, sans engagement</div>
-      </div>
-
-      <!-- stat 40+ villes -->
-      <div class="bg-white/15 border border-white/25 rounded-3xl p-6 flex flex-col justify-center">
-        <div class="font-display text-5xl font-light leading-none mb-1">40<span class="text-white/70">+</span></div>
-        <div class="text-sm text-white/85 font-semibold">Municipalités desservies</div>
-      </div>
-
-      <!-- zones -->
-      <div class="sm:col-span-2 bg-white/10 border border-white/20 rounded-3xl p-6">
-        <div class="flex items-center gap-2 mb-3"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><h3 class="font-display text-lg">Zones desservies</h3></div>
-        <div class="flex flex-wrap gap-2">
-          <span class="bg-white text-[#1573C9] rounded-full px-3 py-1 text-xs font-bold">St-Jean-Richelieu</span>
-          <span class="bg-white/15 border border-white/25 rounded-full px-3 py-1 text-xs">Longueuil</span>
-          <span class="bg-white/15 border border-white/25 rounded-full px-3 py-1 text-xs">Brossard</span>
-          <span class="bg-white/15 border border-white/25 rounded-full px-3 py-1 text-xs">Boucherville</span>
-          <span class="bg-white/15 border border-white/25 rounded-full px-3 py-1 text-xs">Saint-Hubert</span>
-          <span class="bg-white/15 border border-white/25 rounded-full px-3 py-1 text-xs">Chambly</span>
-          <span class="bg-white/15 border border-white/25 rounded-full px-3 py-1 text-xs">Sainte-Julie</span>
-          <span class="bg-white/15 border border-white/25 rounded-full px-3 py-1 text-xs">Granby</span>
-          <span class="bg-white/15 border border-white/25 rounded-full px-3 py-1 text-xs">St-Hyacinthe</span>
-          <span class="bg-white/15 border border-white/25 rounded-full px-3 py-1 text-xs text-white/70">+ 30 autres</span>
-        </div>
-      </div>
-
-      <!-- confiance -->
-      <div class="bg-white text-ink rounded-3xl p-6 flex flex-col justify-center gap-2.5">
-        <div class="flex items-center gap-2 text-sm font-semibold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1573C9" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Membre INCV</div>
-        <div class="flex items-center gap-2 text-sm font-semibold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1573C9" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Assuré & certifié</div>
-        <div class="flex items-center gap-2 text-sm font-semibold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1573C9" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Rapport photo inclus</div>
-      </div>
+    <div class="panel-in service-grid mb-4">
+      <article class="service-card">
+        <div class="service-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M12 3v18M4 12h16"/><path d="M17.5 5.5l1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1z"/></svg></div>
+        <div class="service-card-copy"><h3>Nettoyage de vitres</h3><p>Vitres, cadres et surfaces vitrées nettoyés avec soin pour un fini clair et sans traces.</p></div>
+      </article>
+      <article class="service-card">
+        <div class="service-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="15.5" cy="12" r="4"/><path d="M15.5 8v8M11.5 12h8M5.5 9h4M5.5 12h4M5.5 15h4"/></svg></div>
+        <div class="service-card-copy"><h3>Thermopompes</h3><p>Nettoyage des unités pour retirer l'accumulation visible et garder l'équipement propre.</p></div>
+      </article>
+      <article class="service-card">
+        <div class="service-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2c2.2 0 4 2.8 4 6.2M22 12c0 2.2-2.8 4-6.2 4M12 22c-2.2 0-4-2.8-4-6.2M2 12c0-2.2 2.8-4 6.2-4"/></svg></div>
+        <div class="service-card-copy"><h3>Ventilation</h3><p>Entretien des composantes accessibles pour des installations plus propres et mieux entretenues.</p></div>
+      </article>
+      <article class="service-card">
+        <div class="service-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14l7-7 4 4 7-7"/><path d="M14 4h7v7"/><path d="M5 18h14"/></svg></div>
+        <div class="service-card-copy"><h3>Lavage à pression</h3><p>Nettoyage en profondeur des revêtements, surfaces extérieures et pavés.</p></div>
+      </article>
+      <article class="service-card">
+        <div class="service-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h5a4 4 0 0 1 4 4v8a4 4 0 0 0 4 4h1"/><path d="M17 17l3 3-3 3"/><circle cx="7" cy="4" r="2"/></svg></div>
+        <div class="service-card-copy"><h3>Conduits de sécheuse</h3><p>Retrait des accumulations dans les conduits accessibles pour un entretien régulier.</p></div>
+      </article>
+      <article class="service-card">
+        <div class="service-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18"/><path d="M5 7v4c0 4 3 6 7 6s7-2 7-6V7"/><path d="M12 17v4"/><path d="M9 21h6"/></svg></div>
+        <div class="service-card-copy"><h3>Gouttières</h3><p>Nettoyage des débris pour garder les gouttières propres et favoriser l'écoulement.</p></div>
+      </article>
     </div>
 
-    <div class="panel-in mt-8"><a href="https://plannit.io/merchants/lavageunion?language=fr&view=merchantProfile" target="_blank" rel="noopener" class="inline-flex items-center gap-2.5 bg-white text-[#1573C9] px-7 py-3.5 rounded-full font-bold hover:brightness-95 transition">Obtenir mon devis <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a></div>
+    <div class="panel-in services-cta flex flex-wrap items-center justify-between gap-3">
+      <div><div class="font-display text-lg font-semibold">Plusieurs services à faire?</div><div class="text-white/80 text-xs mt-1">Regroupez-les dans une même demande et simplifiez votre entretien.</div></div>
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="text-white/80 text-xs">Montréal, Rive-Sud &amp; Montérégie</span>
+        <a href="https://plannit.io/merchants/lavageunion?language=fr&view=merchantProfile" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-white text-[#0B5D96] px-5 py-2.5 rounded-full text-sm font-bold hover:brightness-95 transition">Demander une soumission <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ══════════ PANNEAU 2 · RÉALISATIONS ══════════ -->
-<section id="panel-action" class="panel screen text-white bg-gradient-to-br from-[#173A8A] via-[#2563EB] to-[#3B82F6]">
-  <div class="max-w-6xl mx-auto px-6 lg:px-10 py-14 lg:py-20">
-    <div class="flex items-start justify-between mb-12">
-      <div class="panel-in flex items-start gap-4"><span class="w-14 h-14 rounded-2xl bg-white text-[#1E3A8A] font-display font-bold text-3xl flex items-center justify-center shadow-lg shrink-0">2</span><div><div class="text-xs font-bold uppercase tracking-[0.2em] text-white/80 mb-2">Réalisations</div><h2 class="font-display text-4xl md:text-5xl font-light leading-[0.98]">Nos services, en action.</h2></div></div>
+<!-- ══════════ NOUS VOIR EN ACTION ══════════ -->
+<section id="panel-voir" class="panel screen text-white" style="background: radial-gradient(circle at 12% 10%, rgba(101,198,247,.88) 0%, rgba(51,174,238,.46) 22%, rgba(51,174,238,0) 43%), radial-gradient(circle at 88% 82%, rgba(48,106,185,.55) 0%, rgba(48,106,185,0) 38%), linear-gradient(135deg, #339FDC 0%, #277EC0 38%, #225FA5 65%, #0B3268 100%)">
+  <div class="van-reveal"><img src="hero-van.jpg" alt=""></div>
+  <div class="panel-shell max-w-6xl mx-auto px-6 lg:px-10 py-8 min-h-full flex flex-col justify-center">
+    <div class="flex items-start justify-between mb-6">
+      <div class="panel-in"><div class="text-xs font-bold uppercase tracking-[0.2em] text-white/80 mb-2">Réalisations</div><h2 class="font-display text-3xl md:text-4xl font-light leading-[0.98]">Nous voir en action.</h2></div>
       <button data-close class="btn-close shrink-0 w-11 h-11 rounded-full border border-white/40 flex items-center justify-center text-white" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
-    <div class="panel-in grid md:grid-cols-3 gap-4">
-      <div class="relative rounded-2xl overflow-hidden aspect-[3/4] ring-1 ring-white/15"><video class="w-full h-full object-cover" poster="https://static.wixstatic.com/media/b0fb25_e50c6f43903a4dec8787dfe4029bca49f003.jpg" preload="metadata" playsinline controls><source src="https://video.wixstatic.com/video/b0fb25_e50c6f43903a4dec8787dfe4029bca49/720p/mp4/file.mp4" type="video/mp4"><source src="https://video.wixstatic.com/video/b0fb25_e50c6f43903a4dec8787dfe4029bca49/480p/mp4/file.mp4" type="video/mp4"></video><div class="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-[#0c1f4d] to-transparent pointer-events-none"><div class="text-white/70 text-[11px] uppercase tracking-widest font-bold">Thermopompes</div><div class="font-display text-white text-lg">Nettoyage d'unité</div></div></div>
-      <div class="relative rounded-2xl overflow-hidden aspect-[3/4] ring-1 ring-white/15"><video class="w-full h-full object-cover" poster="https://static.wixstatic.com/media/b0fb25_82d0060517b34966831181990da04bbbf003.jpg" preload="metadata" playsinline controls><source src="https://video.wixstatic.com/video/b0fb25_82d0060517b34966831181990da04bbb/720p/mp4/file.mp4" type="video/mp4"><source src="https://video.wixstatic.com/video/b0fb25_82d0060517b34966831181990da04bbb/480p/mp4/file.mp4" type="video/mp4"></video><div class="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-[#0c1f4d] to-transparent pointer-events-none"><div class="text-white/70 text-[11px] uppercase tracking-widest font-bold">Lavage à pression</div><div class="font-display text-white text-lg">Revêtements et pavés</div></div></div>
-      <div class="relative rounded-2xl overflow-hidden aspect-[3/4] ring-1 ring-white/15"><video class="w-full h-full object-cover" poster="https://static.wixstatic.com/media/8d59ab_633b832b3eed4b86b87beb57fc034048f003.jpg" preload="metadata" playsinline muted controls><source src="https://video.wixstatic.com/video/8d59ab_633b832b3eed4b86b87beb57fc034048/720p/mp4/file.mp4" type="video/mp4"><source src="https://video.wixstatic.com/video/8d59ab_633b832b3eed4b86b87beb57fc034048/480p/mp4/file.mp4" type="video/mp4"></video><div class="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-[#0c1f4d] to-transparent pointer-events-none"><div class="text-white/70 text-[11px] uppercase tracking-widest font-bold">Nettoyage de vitres</div><div class="font-display text-white text-lg">En hauteur, sans traces</div></div></div>
+    <div class="panel-in testimonials grid md:grid-cols-3 gap-3">
+      <div><div class="rounded-2xl overflow-hidden aspect-video ring-1 ring-white/15"><video class="w-full h-full object-cover" poster="https://static.wixstatic.com/media/b0fb25_e50c6f43903a4dec8787dfe4029bca49f003.jpg" preload="metadata" playsinline controls><source src="https://video.wixstatic.com/video/b0fb25_e50c6f43903a4dec8787dfe4029bca49/720p/mp4/file.mp4" type="video/mp4"><source src="https://video.wixstatic.com/video/b0fb25_e50c6f43903a4dec8787dfe4029bca49/480p/mp4/file.mp4" type="video/mp4"></video></div><div class="mt-2"><div class="text-white/75 text-[10px] uppercase tracking-widest font-bold">Thermopompes</div><div class="font-display text-white text-base">Nettoyage d'unité</div></div></div>
+      <div><div class="rounded-2xl overflow-hidden aspect-video ring-1 ring-white/15"><video class="w-full h-full object-cover" poster="https://static.wixstatic.com/media/b0fb25_82d0060517b34966831181990da04bbbf003.jpg" preload="metadata" playsinline controls><source src="https://video.wixstatic.com/video/b0fb25_82d0060517b34966831181990da04bbb/720p/mp4/file.mp4" type="video/mp4"><source src="https://video.wixstatic.com/video/b0fb25_82d0060517b34966831181990da04bbb/480p/mp4/file.mp4" type="video/mp4"></video></div><div class="mt-2"><div class="text-white/75 text-[10px] uppercase tracking-widest font-bold">Lavage à pression</div><div class="font-display text-white text-base">Revêtements et pavés</div></div></div>
+      <div><div class="rounded-2xl overflow-hidden aspect-video ring-1 ring-white/15"><video class="w-full h-full object-cover" poster="https://static.wixstatic.com/media/8d59ab_633b832b3eed4b86b87beb57fc034048f003.jpg" preload="metadata" playsinline muted controls><source src="https://video.wixstatic.com/video/8d59ab_633b832b3eed4b86b87beb57fc034048/720p/mp4/file.mp4" type="video/mp4"><source src="https://video.wixstatic.com/video/8d59ab_633b832b3eed4b86b87beb57fc034048/480p/mp4/file.mp4" type="video/mp4"></video></div><div class="mt-2"><div class="text-white/75 text-[10px] uppercase tracking-widest font-bold">Nettoyage de vitres</div><div class="font-display text-white text-base">En hauteur, sans traces</div></div></div>
     </div>
-    <div class="panel-in mt-10 flex flex-wrap items-center gap-3">
+    <div class="panel-in mt-8 flex flex-wrap items-center gap-3">
       <a href="https://www.facebook.com/profile.php?id=61573112379951" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/30 hover:bg-white hover:text-[#1E3A8A] text-white px-5 py-2.5 rounded-full text-sm font-bold transition-colors">Facebook</a>
       <a href="https://www.linkedin.com/company/lavage-union" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/30 hover:bg-white hover:text-[#1E3A8A] text-white px-5 py-2.5 rounded-full text-sm font-bold transition-colors">LinkedIn</a>
     </div>
   </div>
 </section>
 
-<!-- ══════════ PANNEAU 3 · NOTRE APPROCHE ══════════ -->
-<section id="panel-approche" class="panel screen text-white bg-gradient-to-br from-[#4AA8F0] via-[#2E86D8] to-[#1B5FB0]">
-  <div class="max-w-6xl mx-auto px-6 lg:px-10 py-14 lg:py-20">
-    <div class="flex items-start justify-between mb-14">
-      <div class="panel-in flex items-start gap-4"><span class="w-14 h-14 rounded-2xl bg-white text-[#1B5FB0] font-display font-bold text-3xl flex items-center justify-center shadow-lg shrink-0">3</span><div><div class="text-xs font-bold uppercase tracking-[0.2em] text-white/80 mb-2">Notre approche</div><h2 class="font-display text-4xl md:text-5xl font-light leading-[0.98]">Une méthode <span class="italic">simple</span>,<br>des résultats durables.</h2></div></div>
+<!-- ══════════ NOTRE APPROCHE ══════════ -->
+<section id="panel-approche" class="panel screen text-white" style="background: radial-gradient(circle at 13% 8%, rgba(142,222,255,.92) 0%, rgba(61,178,233,.58) 23%, rgba(61,178,233,0) 45%), radial-gradient(circle at 86% 88%, rgba(35,91,166,.56) 0%, rgba(35,91,166,0) 40%), linear-gradient(135deg, #49B8ED 0%, #2C8BCD 38%, #2368AE 66%, #0A356B 100%)">
+  <div class="van-reveal"><img src="hero-van.jpg" alt=""></div>
+  <div class="panel-shell max-w-6xl mx-auto px-6 lg:px-10 py-8 min-h-full flex flex-col justify-center">
+    <div class="flex items-start justify-between mb-6">
+      <div class="panel-in"><div class="text-xs font-bold uppercase tracking-[0.2em] text-white/80 mb-2">Notre approche</div><h2 class="font-display text-3xl md:text-4xl font-light leading-[0.98]">Un processus simple, des résultats durables.</h2></div>
       <button data-close class="btn-close shrink-0 w-11 h-11 rounded-full border border-white/40 flex items-center justify-center text-white" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
-    <p class="panel-in text-lg text-white/80 leading-relaxed max-w-2xl mb-16">De la première prise de contact au rapport final, chaque étape est pensée pour vous offrir un service efficace, transparent et sans tracas.</p>
-    <div class="panel-in relative">
-      <div class="hidden lg:block absolute top-12 left-[11%] right-[11%] h-0.5 timeline-line"></div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-6 relative">
-        <div class="text-center"><div class="relative inline-flex mb-6"><div class="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-xl"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1B5FB0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div class="absolute -top-1 -right-1 w-9 h-9 rounded-full bg-ink text-white font-display font-bold flex items-center justify-center shadow-lg">1</div></div><h3 class="font-display text-xl mb-2">Soumission</h3><p class="text-sm text-white/80 leading-relaxed max-w-[220px] mx-auto">Décrivez vos besoins. Devis détaillé en moins de 24 h, sans engagement.</p></div>
-        <div class="text-center"><div class="relative inline-flex mb-6"><div class="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-xl"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1B5FB0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="absolute -top-1 -right-1 w-9 h-9 rounded-full bg-ink text-white font-display font-bold flex items-center justify-center shadow-lg">2</div></div><h3 class="font-display text-xl mb-2">Planification</h3><p class="text-sm text-white/80 leading-relaxed max-w-[220px] mx-auto">Nous fixons une date qui vous convient. Une seule visite pour tous vos services.</p></div>
-        <div class="text-center"><div class="relative inline-flex mb-6"><div class="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-xl"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1B5FB0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><div class="absolute -top-1 -right-1 w-9 h-9 rounded-full bg-ink text-white font-display font-bold flex items-center justify-center shadow-lg">3</div></div><h3 class="font-display text-xl mb-2">Intervention</h3><p class="text-sm text-white/80 leading-relaxed max-w-[220px] mx-auto">Notre équipe expérimentée intervient avec des équipements à la fine pointe.</p></div>
-        <div class="text-center"><div class="relative inline-flex mb-6"><div class="w-24 h-24 rounded-full bg-ink flex items-center justify-center shadow-xl"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="absolute -top-1 -right-1 w-9 h-9 rounded-full bg-white text-ink font-display font-bold flex items-center justify-center shadow-lg">4</div></div><h3 class="font-display text-xl mb-2">Rapport photo</h3><p class="text-sm text-white/80 leading-relaxed max-w-[220px] mx-auto">Vous recevez un compte-rendu personnalisé avec photos avant / après.</p></div>
+
+    <div class="panel-in process-flow-wrap mb-5 lg:mb-6">
+      <div class="process-track hidden lg:block"></div>
+      <div class="process-flow">
+        <div class="process-step">
+          <div class="process-icon"><span class="process-num">1</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+          <div class="process-copy"><h3>Soumission</h3><p>Décrivez vos besoins. Devis détaillé en moins de 24 h, sans engagement.</p></div>
+        </div>
+        <div class="process-step">
+          <div class="process-icon"><span class="process-num">2</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div class="process-copy"><h3>Planification</h3><p>Nous fixons une date qui vous convient. Une seule visite pour tous vos services.</p></div>
+        </div>
+        <div class="process-step">
+          <div class="process-icon"><span class="process-num">3</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+          <div class="process-copy"><h3>Intervention</h3><p>Notre équipe expérimentée intervient avec des équipements à la fine pointe.</p></div>
+        </div>
+        <div class="process-step is-dark">
+          <div class="process-icon"><span class="process-num">4</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 14.5l2 2 4-4.5"/></svg></div>
+          <div class="process-copy"><h3>Rapport photo</h3><p>Vous recevez un compte-rendu personnalisé avec photos avant / après.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-in grid lg:grid-cols-[320px_1fr] gap-4 items-center">
+      <div class="approach-bottom-card p-5"><svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg" class="approach-report w-full h-auto max-w-[280px] mx-auto"><rect x="16" y="12" width="268" height="276" rx="18" fill="#fff"/><text x="34" y="44" font-family="Outfit, sans-serif" font-size="15" font-weight="600" fill="#0E1B33">Rapport d'intervention</text><text x="34" y="62" font-family="Plus Jakarta Sans, sans-serif" font-size="11" fill="#5C6B84">22 oct. 2025 · Lavage Union</text><line x1="34" y1="76" x2="266" y2="76" stroke="#E4E3DD" stroke-width="1.5"/><rect x="34" y="90" width="110" height="80" rx="10" fill="#C9D3DB"/><rect x="156" y="90" width="110" height="80" rx="10" fill="#0095C8"/><rect x="42" y="150" width="46" height="15" rx="4" fill="#fff"/><text x="49" y="161" font-family="Plus Jakarta Sans, sans-serif" font-size="9" font-weight="700" fill="#0E1B33">AVANT</text><rect x="164" y="150" width="46" height="15" rx="4" fill="#085292"/><text x="171" y="161" font-family="Plus Jakarta Sans, sans-serif" font-size="9" font-weight="700" fill="#fff">APRÈS</text><g font-family="Plus Jakarta Sans, sans-serif" font-size="11" fill="#0E1B33"><circle cx="42" cy="198" r="9" fill="#EAF6FC"/><path d="M38 198l3 3 5-6" stroke="#0095C8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="58" y="202">Vitres extérieures · 32 unités</text><circle cx="42" cy="228" r="9" fill="#EAF6FC"/><path d="M38 228l3 3 5-6" stroke="#0095C8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="58" y="232">Cadres et moustiquaires nettoyés</text><circle cx="42" cy="258" r="9" fill="#EAF6FC"/><path d="M38 258l3 3 5-6" stroke="#0095C8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="58" y="262">Aucune anomalie détectée</text></g></svg></div>
+      <div class="approach-bottom-copy p-5 lg:p-6">
+        <div class="font-display text-2xl mb-2 text-white">Clair du début à la fin.</div>
+        <p class="text-white/84 leading-relaxed mb-4">Chaque étape est pensée pour vous simplifier la vie : une réponse rapide, une visite bien planifiée, un travail soigné et un suivi visuel concret après l'intervention.</p>
+        <div class="approach-mini-pills">
+          <span>Réponse en moins de 24 h</span>
+          <span>Une seule visite multi-services</span>
+          <span>Équipe expérimentée</span>
+          <span>Photos avant / après</span>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════ PANNEAU 4 · AVANT/APRÈS + AVIS ══════════ -->
-<section id="panel-resultats" class="panel screen text-white bg-gradient-to-br from-[#6C7BF2] via-[#5563E6] to-[#3D3FC4]">
-  <div class="max-w-5xl mx-auto px-6 lg:px-10 py-14 lg:py-20">
-    <div class="flex items-start justify-between mb-10">
-      <div class="panel-in flex items-start gap-4"><span class="w-14 h-14 rounded-2xl bg-white text-[#4C41D6] font-display font-bold text-3xl flex items-center justify-center shadow-lg shrink-0">4</span><div><div class="text-xs font-bold uppercase tracking-[0.2em] text-white/80 mb-2">Avant / après & témoignages</div><h2 class="font-display text-4xl md:text-5xl font-light leading-[0.98]">Le résultat<br>parle de lui-même.</h2></div></div>
+<!-- ══════════ DEMANDER UNE SOUMISSION ══════════ -->
+<section id="panel-soumission" class="panel screen text-white" style="background: radial-gradient(circle at 11% 9%, rgba(94,202,247,.90) 0%, rgba(51,174,238,.50) 22%, rgba(51,174,238,0) 44%), radial-gradient(circle at 88% 84%, rgba(48,106,185,.62) 0%, rgba(48,106,185,0) 40%), linear-gradient(135deg, #2BA7E0 0%, #247DBE 38%, #1B579B 65%, #072C5B 100%)">
+  <div class="van-reveal"><img src="hero-van.jpg" alt=""></div>
+  <div class="panel-shell max-w-4xl mx-auto px-6 lg:px-10 py-8 min-h-full flex flex-col justify-center">
+    <div class="flex items-start justify-between mb-8">
+      <div class="panel-in"><div class="text-xs font-bold uppercase tracking-[0.2em] text-white/80 mb-2">Nous joindre</div><h2 class="font-display text-3xl md:text-4xl font-light leading-[0.98]">Soumission gratuite en 24 heures.</h2></div>
       <button data-close class="btn-close shrink-0 w-11 h-11 rounded-full border border-white/40 flex items-center justify-center text-white" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
-
-    <!-- onglets -->
-    <div class="panel-in flex flex-wrap gap-2 mb-5">
-      <button type="button" data-scene-btn="vitres" class="ba-tab is-on text-sm font-bold px-5 py-2.5 rounded-full border border-white/40 text-white transition">Vitres</button>
-      <button type="button" data-scene-btn="thermo" class="ba-tab text-sm font-bold px-5 py-2.5 rounded-full border border-white/40 text-white transition">Thermopompe</button>
-      <button type="button" data-scene-btn="pave" class="ba-tab text-sm font-bold px-5 py-2.5 rounded-full border border-white/40 text-white transition">Pavé uni</button>
-    </div>
-
-    <div class="panel-in mb-4">
-      <div id="baWrap" class="ba aspect-[16/9] w-full rounded-2xl overflow-hidden ring-1 ring-white/20 relative">
-        <!-- Vitres — REMPLACER l'URL par la vraie photo (avant = après = même image) -->
-        <div class="ba-scene" data-scene="vitres">
-          <div class="ba-after"><img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1400&q=80&auto=format&fit=crop"></div>
-          <div class="ba-before" style="clip-path:inset(0 50% 0 0)"><img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1400&q=80&auto=format&fit=crop"><div class="ba-grime"></div></div>
-        </div>
-        <!-- Thermopompe -->
-        <div class="ba-scene hidden" data-scene="thermo">
-          <div class="ba-after"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80&auto=format&fit=crop"></div>
-          <div class="ba-before" style="clip-path:inset(0 50% 0 0)"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80&auto=format&fit=crop"><div class="ba-grime"></div></div>
-        </div>
-        <!-- Pavé uni -->
-        <div class="ba-scene hidden" data-scene="pave">
-          <div class="ba-after"><img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1400&q=80&auto=format&fit=crop&sat=-30"></div>
-          <div class="ba-before" style="clip-path:inset(0 50% 0 0)"><img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1400&q=80&auto=format&fit=crop&sat=-30"><div class="ba-grime"></div></div>
-        </div>
-        <span class="ba-tag left-4 bg-white/90 text-ink">Avant</span>
-        <span class="ba-tag right-4 bg-[#4C41D6] text-white">Après</span>
-        <div class="ba-divider" style="left:50%;"><div class="ba-handle" tabindex="0" role="slider" aria-label="Comparer avant et après" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div></div>
-      </div>
-      <p class="text-center text-xs text-white/70 mt-3">Exemples — les vraies photos de vos chantiers viendront ici. Glissez pour comparer.</p>
-    </div>
-
-    <div class="panel-in mt-10">
-      <h3 class="font-display text-2xl mb-6">Ce que disent nos clients</h3>
-      <div class="grid md:grid-cols-3 gap-5">
-        <figure class="bg-white/10 border border-white/15 rounded-2xl p-6 flex flex-col"><div class="flex gap-0.5 text-white mb-3"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg></div><blockquote class="text-white/90 text-sm leading-relaxed flex-1 mb-4">Service ponctuel et très professionnel. Le résultat sur les vitres et la thermopompe a dépassé mes attentes.</blockquote><figcaption class="flex items-center gap-3 pt-3 border-t border-white/15"><span class="w-9 h-9 rounded-full bg-white text-[#4C41D6] flex items-center justify-center font-display font-bold text-xs">MG</span><span class="text-sm font-bold">Marie-Claude G. <span class="block text-xs font-normal text-white/60">Saint-Bruno</span></span></figcaption></figure>
-        <figure class="bg-white/10 border border-white/15 rounded-2xl p-6 flex flex-col"><div class="flex gap-0.5 text-white mb-3"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg></div><blockquote class="text-white/90 text-sm leading-relaxed flex-1 mb-4">Le rapport photo est génial — j'ai vu exactement ce qui avait été fait. Forfait multi-services à excellent prix.</blockquote><figcaption class="flex items-center gap-3 pt-3 border-t border-white/15"><span class="w-9 h-9 rounded-full bg-white text-[#4C41D6] flex items-center justify-center font-display font-bold text-xs">PL</span><span class="text-sm font-bold">Patrick L. <span class="block text-xs font-normal text-white/60">Longueuil</span></span></figcaption></figure>
-        <figure class="bg-white/10 border border-white/15 rounded-2xl p-6 flex flex-col"><div class="flex gap-0.5 text-white mb-3"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg></div><blockquote class="text-white/90 text-sm leading-relaxed flex-1 mb-4">Comme gestionnaire d'immeubles, je cherchais un partenaire fiable. Réponse rapide et qualité constante.</blockquote><figcaption class="flex items-center gap-3 pt-3 border-t border-white/15"><span class="w-9 h-9 rounded-full bg-white text-[#4C41D6] flex items-center justify-center font-display font-bold text-xs">SB</span><span class="text-sm font-bold">Sophie B. <span class="block text-xs font-normal text-white/60">Gestionnaire</span></span></figcaption></figure>
-      </div>
-      <div class="mt-10"><a href="https://plannit.io/merchants/lavageunion?language=fr&view=merchantProfile" target="_blank" rel="noopener" class="inline-flex items-center gap-2.5 bg-white text-[#4C41D6] px-7 py-3.5 rounded-full font-bold hover:brightness-95 transition">Obtenir mon devis <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a></div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════ PANNEAU · CONTACT ══════════ -->
-<section id="panel-contact" class="panel screen text-white bg-gradient-to-br from-[#0E1B33] via-[#12315E] to-[#12496E]">
-  <div class="max-w-4xl mx-auto px-6 lg:px-10 py-14 lg:py-20">
-    <div class="flex items-start justify-between mb-12"><div class="panel-in"><div class="text-xs font-bold uppercase tracking-[0.2em] text-aqua mb-3">Nous joindre</div><h2 class="font-display text-4xl md:text-5xl font-light leading-[0.98]">Parlons de votre<br>propriété.</h2></div><button data-close class="btn-close shrink-0 w-11 h-11 rounded-full border border-white/40 flex items-center justify-center text-white" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-    <div class="panel-in grid md:grid-cols-2 gap-10 items-start">
+    <div class="panel-in grid md:grid-cols-2 gap-8 items-start">
       <div class="space-y-4">
-        <a href="tel:14385212103" class="flex items-center gap-3 text-white text-lg font-semibold hover:text-aqua transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0FB5C6" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 438 521-2103</a>
-        <a href="mailto:info@lavageunion.com" class="flex items-center gap-3 text-white/80 hover:text-white transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0FB5C6" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> info@lavageunion.com</a>
-        <div class="flex items-center gap-3 text-white/80"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0FB5C6" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Saint-Jean-sur-Richelieu, QC</div>
-        <div class="flex gap-3 pt-3">
-          <a href="https://www.facebook.com/profile.php?id=61573112379951" target="_blank" rel="noopener" class="w-10 h-10 rounded-full border border-white/25 hover:border-aqua hover:text-aqua flex items-center justify-center text-white transition-colors"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
-          <a href="https://www.linkedin.com/company/lavage-union" target="_blank" rel="noopener" class="w-10 h-10 rounded-full border border-white/25 hover:border-aqua hover:text-aqua flex items-center justify-center text-white transition-colors"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+        <p class="text-white/85 leading-relaxed mb-2">Décrivez vos besoins, recevez un devis détaillé — aucun engagement.</p>
+        <a href="tel:14385212103" class="flex items-center gap-3 text-white text-lg font-semibold hover:text-white/80 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7FE0F2" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 438 521-2103</a>
+        <a href="mailto:info@lavageunion.com" class="flex items-center gap-3 text-white/85 hover:text-white transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7FE0F2" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> info@lavageunion.com</a>
+        <div class="flex items-center gap-3 text-white/85"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7FE0F2" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Saint-Jean-sur-Richelieu, QC</div>
+        <div class="flex gap-3 pt-2">
+          <a href="https://www.facebook.com/profile.php?id=61573112379951" target="_blank" rel="noopener" class="w-10 h-10 rounded-full border border-white/25 hover:border-white hover:bg-white/10 flex items-center justify-center text-white transition-colors"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="https://www.linkedin.com/company/lavage-union" target="_blank" rel="noopener" class="w-10 h-10 rounded-full border border-white/25 hover:border-white hover:bg-white/10 flex items-center justify-center text-white transition-colors"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
         </div>
       </div>
-      <div class="bg-white/5 border border-white/10 rounded-2xl p-7"><div class="font-display text-2xl text-white mb-2">Soumission en 24 h</div><p class="text-white/70 text-sm leading-relaxed mb-6">Décrivez vos besoins, recevez un devis détaillé sans engagement.</p><a href="https://plannit.io/merchants/lavageunion?language=fr&view=merchantProfile" target="_blank" rel="noopener" class="inline-flex w-full justify-center items-center gap-2.5 bg-aqua hover:brightness-110 text-ink px-7 py-4 rounded-full font-bold transition">Obtenir mon devis <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a></div>
+      <div class="bg-white/10 border border-white/15 rounded-2xl p-7 text-center">
+        <div class="font-display text-2xl text-white mb-2">Prêt à commencer ?</div>
+        <p class="text-white/80 text-sm leading-relaxed mb-6">Obtenez votre soumission en ligne en quelques minutes.</p>
+        <a href="https://plannit.io/merchants/lavageunion?language=fr&view=merchantProfile" target="_blank" rel="noopener" class="inline-flex w-full justify-center items-center gap-2.5 bg-white text-[#0A5EA0] px-7 py-4 rounded-full font-bold hover:brightness-95 transition">Demander ma soumission <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+      </div>
     </div>
   </div>
 </section>
 
 <script>
-  function openPanel(name){ var p=document.getElementById('panel-'+name); if(!p) return; p.classList.add('open'); p.scrollTop=0; }
-  function closeAll(){ document.querySelectorAll('.panel.open').forEach(function(p){ p.classList.remove('open'); }); }
+  function resetVanReveal(panel){
+    var reveal = panel.querySelector('.van-reveal');
+    if(!reveal) return;
+    reveal.classList.remove('play');
+    void reveal.offsetWidth;
+    reveal.classList.add('play');
+    window.setTimeout(function(){ reveal.classList.remove('play'); }, 1950);
+  }
+  function openPanel(name){
+    closeAll();
+    var p=document.getElementById('panel-'+name);
+    if(!p) return;
+    p.scrollTop=0;
+    p.classList.add('open');
+    resetVanReveal(p);
+  }
+  function closeAll(){
+    document.querySelectorAll('.panel.open').forEach(function(p){
+      p.classList.remove('open');
+      var reveal=p.querySelector('.van-reveal');
+      if(reveal) reveal.classList.remove('play');
+    });
+  }
   document.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click', function(){ openPanel(b.getAttribute('data-open')); }); });
   document.querySelectorAll('[data-close]').forEach(function(b){ b.addEventListener('click', closeAll); });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeAll(); });
-  document.querySelectorAll('video[autoplay]').forEach(function(v){ v.muted=true; var p=v.play(); if(p) p.catch(function(){}); });
-
-  (function(){
-    var wrap=document.getElementById('baWrap'); if(!wrap) return;
-    var divider=wrap.querySelector('.ba-divider'), handle=wrap.querySelector('.ba-handle');
-    var pos=50;
-    function activeBefore(){ var s=wrap.querySelector('.ba-scene:not(.hidden)'); return s?s.querySelector('.ba-before'):null; }
-    function set(p){ pos=Math.max(0,Math.min(100,p)); var b=activeBefore(); if(b) b.style.clipPath='inset(0 '+(100-pos)+'% 0 0)'; divider.style.left=pos+'%'; handle.setAttribute('aria-valuenow',Math.round(pos)); }
-    function fromEvent(e){ var r=wrap.getBoundingClientRect(); var x=(e.touches&&e.touches[0])?e.touches[0].clientX:e.clientX; set(((x-r.left)/r.width)*100); }
-    var dragging=false;
-    wrap.addEventListener('pointerdown',function(e){ dragging=true; if(wrap.setPointerCapture){try{wrap.setPointerCapture(e.pointerId);}catch(x){}} fromEvent(e); });
-    wrap.addEventListener('pointermove',function(e){ if(dragging) fromEvent(e); });
-    window.addEventListener('pointerup',function(){ dragging=false; });
-    handle.addEventListener('keydown',function(e){ if(e.key==='ArrowLeft'){set(pos-4);e.preventDefault();} if(e.key==='ArrowRight'){set(pos+4);e.preventDefault();} });
-    document.querySelectorAll('[data-scene-btn]').forEach(function(btn){ btn.addEventListener('click',function(){
-      var name=btn.getAttribute('data-scene-btn');
-      wrap.querySelectorAll('.ba-scene').forEach(function(s){ s.classList.toggle('hidden', s.getAttribute('data-scene')!==name); });
-      document.querySelectorAll('[data-scene-btn]').forEach(function(b){ b.classList.remove('is-on'); });
-      btn.classList.add('is-on'); set(pos);
-    }); });
-    set(50);
-  })();
 </script>
 
 </body>
